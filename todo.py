@@ -23,3 +23,23 @@ def add_task(title):
     tasks.append({"id": new_id, "title": title, "done": False})
     save_tasks(tasks)
     print(f"Đã thêm task #{new_id}: {title}")
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Cách dùng: python todo.py add <nội dung>")
+        return
+
+    command = sys.argv[1]
+
+    if command == "add":
+        if len(sys.argv) < 3:
+            print("Thiếu nội dung task.")
+            return
+        add_task(" ".join(sys.argv[2:]))
+    else:
+        print(f"Lệnh không hợp lệ: {command}")
+
+
+if __name__ == "__main__":
+    main()
