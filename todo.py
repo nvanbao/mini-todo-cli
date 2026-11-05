@@ -32,10 +32,12 @@ def list_tasks():
     for t in tasks:
         mark = "x" if t["done"] else " "
         print(f"[{mark}] {t['id']}. {t['title']}")
-        
+
 def main():
     if len(sys.argv) < 2:
-        print("Cách dùng: python todo.py add <nội dung>")
+        print("Cách dùng:")
+        print("  python todo.py add <nội dung>")
+        print("  python todo.py list")
         return
 
     command = sys.argv[1]
@@ -45,6 +47,8 @@ def main():
             print("Thiếu nội dung task.")
             return
         add_task(" ".join(sys.argv[2:]))
+    elif command == "list":
+        list_tasks()
     else:
         print(f"Lệnh không hợp lệ: {command}")
 
