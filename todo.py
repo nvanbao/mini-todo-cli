@@ -24,7 +24,15 @@ def add_task(title):
     save_tasks(tasks)
     print(f"Đã thêm task #{new_id}: {title}")
 
-
+def list_tasks():
+    tasks = load_tasks()
+    if not tasks:
+        print("Chưa có task nào.")
+        return
+    for t in tasks:
+        mark = "x" if t["done"] else " "
+        print(f"[{mark}] {t['id']}. {t['title']}")
+        
 def main():
     if len(sys.argv) < 2:
         print("Cách dùng: python todo.py add <nội dung>")
