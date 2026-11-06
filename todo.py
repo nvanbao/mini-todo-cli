@@ -32,6 +32,16 @@ def list_tasks():
     for t in tasks:
         mark = "x" if t["done"] else " "
         print(f"[{mark}] {t['id']}. {t['title']}")
+        
+def mark_done(task_id):
+    tasks = load_tasks()
+    for t in tasks:
+        if t["id"] == task_id:
+            t["done"] = True
+            save_tasks(tasks)
+            print(f"Đã hoàn thành task #{task_id}")
+            return
+    print(f"Không tìm thấy task #{task_id}")
 
 def main():
     if len(sys.argv) < 2:
