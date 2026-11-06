@@ -24,6 +24,7 @@ def add_task(title):
     save_tasks(tasks)
     print(f"Đã thêm task #{new_id}: {title}")
 
+
 def list_tasks():
     tasks = load_tasks()
     if not tasks:
@@ -32,7 +33,8 @@ def list_tasks():
     for t in tasks:
         mark = "x" if t["done"] else " "
         print(f"[{mark}] {t['id']}. {t['title']}")
-        
+
+
 def mark_done(task_id):
     tasks = load_tasks()
     for t in tasks:
@@ -43,6 +45,16 @@ def mark_done(task_id):
             return
     print(f"Không tìm thấy task #{task_id}")
 
+
+def delete_task(task_id):
+    tasks = load_tasks()
+    new_tasks = [t for t in tasks if t["id"] != task_id]
+    if len(new_tasks) == len(tasks):
+        print(f"Không tìm thấy task #{task_id}")
+        return
+    save_tasks(new_tasks)
+    print(f"Đã xóa task #{task_id}")
+    
 def main():
     if len(sys.argv) < 2:
         print("Cách dùng:")
@@ -59,6 +71,11 @@ def main():
         add_task(" ".join(sys.argv[2:]))
     elif command == "list":
         list_tasks()
+    elif command == "done":
+        if len(sys.argv) < 3 or not sys.argv[2].isdigit():
+            print("Cách dùng: python todo.py done <id>")
+            return
+        mark_done(int(sys.argv[2]))
     else:
         print(f"Lệnh không hợp lệ: {command}")
 
