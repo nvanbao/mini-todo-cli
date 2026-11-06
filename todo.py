@@ -60,6 +60,8 @@ def main():
         print("Cách dùng:")
         print("  python todo.py add <nội dung>")
         print("  python todo.py list")
+        print("  python todo.py done <id>")
+        print("  python todo.py delete <id>")
         return
 
     command = sys.argv[1]
