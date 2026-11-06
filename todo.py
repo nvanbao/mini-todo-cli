@@ -54,7 +54,7 @@ def delete_task(task_id):
         return
     save_tasks(new_tasks)
     print(f"Đã xóa task #{task_id}")
-    
+
 def main():
     if len(sys.argv) < 2:
         print("Cách dùng:")
@@ -76,6 +76,11 @@ def main():
             print("Cách dùng: python todo.py done <id>")
             return
         mark_done(int(sys.argv[2]))
+    elif command == "delete":
+        if len(sys.argv) < 3 or not sys.argv[2].isdigit():
+            print("Cách dùng: python todo.py delete <id>")
+            return
+        delete_task(int(sys.argv[2]))
     else:
         print(f"Lệnh không hợp lệ: {command}")
 
