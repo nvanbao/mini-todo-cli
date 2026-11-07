@@ -74,7 +74,7 @@ def edit_task(task_id, new_title):
             print(f"Đã sửa task #{task_id}: {new_title}")
             return
     print(f"Không tìm thấy task #{task_id}")
-    
+
 def main():
     if len(sys.argv) < 2:
         print("Cách dùng:")
@@ -105,6 +105,16 @@ def main():
         delete_task(int(sys.argv[2]))
     elif command == "clear":
         clear_done()
+    elif command == "edit":
+        if len(sys.argv) < 4 or not sys.argv[2].isdigit():
+            print("Cách dùng: python todo.py edit <id> <nội dung mới>")
+            return
+        edit_task(int(sys.argv[2]), " ".join(sys.argv[3:]))
+    elif command == "edit":
+        if len(sys.argv) < 4 or not sys.argv[2].isdigit():
+            print("Cách dùng: python todo.py edit <id> <nội dung mới>")
+            return
+        edit_task(int(sys.argv[2]), " ".join(sys.argv[3:]))
     else:
         print(f"Lệnh không hợp lệ: {command}")
 
