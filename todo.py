@@ -55,6 +55,16 @@ def delete_task(task_id):
     save_tasks(new_tasks)
     print(f"Đã xóa task #{task_id}")
 
+def clear_done():
+    tasks = load_tasks()
+    remaining = [t for t in tasks if not t["done"]]
+    removed = len(tasks) - len(remaining)
+    if removed == 0:
+        print("Không có task nào đã hoàn thành.")
+        return
+    save_tasks(remaining)
+    print(f"Đã xóa {removed} task đã hoàn thành")
+    
 def main():
     if len(sys.argv) < 2:
         print("Cách dùng:")
