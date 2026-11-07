@@ -64,7 +64,7 @@ def clear_done():
         return
     save_tasks(remaining)
     print(f"Đã xóa {removed} task đã hoàn thành")
-    
+
 def main():
     if len(sys.argv) < 2:
         print("Cách dùng:")
@@ -93,6 +93,8 @@ def main():
             print("Cách dùng: python todo.py delete <id>")
             return
         delete_task(int(sys.argv[2]))
+    elif command == "clear":
+        clear_done()
     else:
         print(f"Lệnh không hợp lệ: {command}")
 
