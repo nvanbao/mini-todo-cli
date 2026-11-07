@@ -65,6 +65,16 @@ def clear_done():
     save_tasks(remaining)
     print(f"Đã xóa {removed} task đã hoàn thành")
 
+def edit_task(task_id, new_title):
+    tasks = load_tasks()
+    for t in tasks:
+        if t["id"] == task_id:
+            t["title"] = new_title
+            save_tasks(tasks)
+            print(f"Đã sửa task #{task_id}: {new_title}")
+            return
+    print(f"Không tìm thấy task #{task_id}")
+    
 def main():
     if len(sys.argv) < 2:
         print("Cách dùng:")
