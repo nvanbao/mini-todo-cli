@@ -82,10 +82,10 @@ def main():
         print("  python todo.py list")
         print("  python todo.py done <id>")
         print("  python todo.py delete <id>")
+        print("  python todo.py edit <id> <nội dung mới>")
+        print("  python todo.py clear")
         return
-
     command = sys.argv[1]
-
     if command == "add":
         if len(sys.argv) < 3:
             print("Thiếu nội dung task.")
