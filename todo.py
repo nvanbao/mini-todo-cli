@@ -4,6 +4,14 @@ from pathlib import Path
 
 DATA_FILE = Path("tasks.json")
 
+USAGE = """Cách dùng:
+  python todo.py add <nội dung>
+  python todo.py list
+  python todo.py done <id>
+  python todo.py delete <id>
+  python todo.py edit <id> <nội dung mới>
+  python todo.py clear"""
+
 
 def load_tasks():
     if not DATA_FILE.exists():
@@ -55,6 +63,7 @@ def delete_task(task_id):
     save_tasks(new_tasks)
     print(f"Đã xóa task #{task_id}")
 
+
 def clear_done():
     tasks = load_tasks()
     remaining = [t for t in tasks if not t["done"]]
@@ -64,6 +73,7 @@ def clear_done():
         return
     save_tasks(remaining)
     print(f"Đã xóa {removed} task đã hoàn thành")
+
 
 def edit_task(task_id, new_title):
     tasks = load_tasks()
@@ -75,48 +85,44 @@ def edit_task(task_id, new_title):
             return
     print(f"Không tìm thấy task #{task_id}")
 
-def main():
-    if len(sys.argv) < 2:
-        print("Cách dùng:")
-        print("  python todo.py add <nội dung>")
-        print("  python todo.py list")
-        print("  python todo.py done <id>")
-        print("  python todo.py delete <id>")
-        print("  python todo.py edit <id> <nội dung mới>")
-        print("  python todo.py clear")
-        return
-    command = sys.argv[1]
+
+def run(argv):
+    if not argv:
+        print(USAGE)
+        return 1
+    command, args = argv[0], argv[1:]
+
     if command == "add":
-        if len(sys.argv) < 3:
+        if not args:
             print("Thiếu nội dung task.")
-            return
-        add_task(" ".join(sys.argv[2:]))
+            return 1
+        add_task(" ".join(args))
     elif command == "list":
         list_tasks()
-    elif command == "done":
-        if len(sys.argv) < 3 or not sys.argv[2].isdigit():
-            print("Cách dùng: python todo.py done <id>")
-            return
-        mark_done(int(sys.argv[2]))
-    elif command == "delete":
-        if len(sys.argv) < 3 or not sys.argv[2].isdigit():
-            print("Cách dùng: python todo.py delete <id>")
-            return
-        delete_task(int(sys.argv[2]))
+    elif command in ("done", "delete"):
+        if not args or not args[0].isdigit():
+            print(f"Cách dùng: python todo.py {command} <id>")
+            return 1
+        if command == "done":
+            mark_done(int(args[0]))
+        else:
+            delete_task(int(args[0]))
+    elif command == "edit":
+        if len(args) < 2 or not args[0].isdigit():
+            print("Cách dùng: python todo.py edit <id> <nội dung mới>")
+            return 1
+        edit_task(int(args[0]), " ".join(args[1:]))
     elif command == "clear":
         clear_done()
-    elif command == "edit":
-        if len(sys.argv) < 4 or not sys.argv[2].isdigit():
-            print("Cách dùng: python todo.py edit <id> <nội dung mới>")
-            return
-        edit_task(int(sys.argv[2]), " ".join(sys.argv[3:]))
-    elif command == "edit":
-        if len(sys.argv) < 4 or not sys.argv[2].isdigit():
-            print("Cách dùng: python todo.py edit <id> <nội dung mới>")
-            return
-        edit_task(int(sys.argv[2]), " ".join(sys.argv[3:]))
     else:
         print(f"Lệnh không hợp lệ: {command}")
+        print(USAGE)
+        return 1
+    return 0
+
+
+def main():
+    sys.exit(run(sys.argv[1:]))
 
 
 if __name__ == "__main__":
