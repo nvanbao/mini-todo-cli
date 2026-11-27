@@ -4,8 +4,10 @@ from pathlib import Path
 
 DATA_FILE = Path("tasks.json")
 
+PRIORITIES = {"high": "cao", "normal": "", "low": "thấp"}
+
 USAGE = """Cách dùng:
-  python todo.py add <nội dung>
+  python todo.py add <nội dung> [--high | --low]
   python todo.py list
   python todo.py done <id>
   python todo.py delete <id>
@@ -25,12 +27,21 @@ def save_tasks(tasks):
         json.dump(tasks, f, ensure_ascii=False, indent=2)
 
 
-def add_task(title):
+def add_task(title, priority="normal"):
     tasks = load_tasks()
     new_id = max((t["id"] for t in tasks), default=0) + 1
-    tasks.append({"id": new_id, "title": title, "done": False})
+    tasks.append({"id": new_id, "title": title, "done": False, "priority": priority})
     save_tasks(tasks)
     print(f"Đã thêm task #{new_id}: {title}")
+
+
+def format_task(t):
+    mark = "x" if t["done"] else " "
+    line = f"[{mark}] {t['id']}. {t['title']}"
+    label = PRIORITIES.get(t.get("priority", "normal"), "")
+    if label:
+        line += f" (ưu tiên {label})"
+    return line
 
 
 def list_tasks():
@@ -39,8 +50,7 @@ def list_tasks():
         print("Chưa có task nào.")
         return
     for t in tasks:
-        mark = "x" if t["done"] else " "
-        print(f"[{mark}] {t['id']}. {t['title']}")
+        print(format_task(t))
 
 
 def mark_done(task_id):
@@ -86,6 +96,22 @@ def edit_task(task_id, new_title):
     print(f"Không tìm thấy task #{task_id}")
 
 
+def parse_add_args(args):
+    priority = "normal"
+    words = []
+    for arg in args:
+        if arg == "--high":
+            priority = "high"
+        elif arg == "--low":
+            priority = "low"
+        else:
+            words.append(arg)
+    title = " ".join(words).strip()
+    if not title:
+        raise ValueError("Thiếu nội dung task.")
+    return title, priority
+
+
 def run(argv):
     if not argv:
         print(USAGE)
@@ -93,10 +119,12 @@ def run(argv):
     command, args = argv[0], argv[1:]
 
     if command == "add":
-        if not args:
-            print("Thiếu nội dung task.")
+        try:
+            title, priority = parse_add_args(args)
+        except ValueError as error:
+            print(error)
             return 1
-        add_task(" ".join(args))
+        add_task(title, priority)
     elif command == "list":
         list_tasks()
     elif command in ("done", "delete"):
