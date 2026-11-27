@@ -1,5 +1,6 @@
 import json
 import sys
+from datetime import date
 from pathlib import Path
 
 DATA_FILE = Path("tasks.json")
@@ -7,12 +8,16 @@ DATA_FILE = Path("tasks.json")
 PRIORITIES = {"high": "cao", "normal": "", "low": "thấp"}
 
 USAGE = """Cách dùng:
-  python todo.py add <nội dung> [--high | --low]
+  python todo.py add <nội dung> [--high | --low] [--due YYYY-MM-DD]
   python todo.py list
   python todo.py done <id>
   python todo.py delete <id>
   python todo.py edit <id> <nội dung mới>
   python todo.py clear"""
+
+
+def today():
+    return date.today()
 
 
 def load_tasks():
@@ -27,10 +32,13 @@ def save_tasks(tasks):
         json.dump(tasks, f, ensure_ascii=False, indent=2)
 
 
-def add_task(title, priority="normal"):
+def add_task(title, priority="normal", due=None):
     tasks = load_tasks()
     new_id = max((t["id"] for t in tasks), default=0) + 1
-    tasks.append({"id": new_id, "title": title, "done": False, "priority": priority})
+    task = {"id": new_id, "title": title, "done": False, "priority": priority}
+    if due:
+        task["due"] = due
+    tasks.append(task)
     save_tasks(tasks)
     print(f"Đã thêm task #{new_id}: {title}")
 
@@ -41,6 +49,11 @@ def format_task(t):
     label = PRIORITIES.get(t.get("priority", "normal"), "")
     if label:
         line += f" (ưu tiên {label})"
+    due = t.get("due")
+    if due:
+        line += f" (hạn {due})"
+        if not t["done"] and date.fromisoformat(due) < today():
+            line += " [QUÁ HẠN]"
     return line
 
 
@@ -98,18 +111,31 @@ def edit_task(task_id, new_title):
 
 def parse_add_args(args):
     priority = "normal"
+    due = None
     words = []
-    for arg in args:
+    i = 0
+    while i < len(args):
+        arg = args[i]
         if arg == "--high":
             priority = "high"
         elif arg == "--low":
             priority = "low"
+        elif arg == "--due":
+            if i + 1 >= len(args):
+                raise ValueError("Thiếu ngày sau --due")
+            due = args[i + 1]
+            try:
+                date.fromisoformat(due)
+            except ValueError:
+                raise ValueError("Ngày hạn phải có dạng YYYY-MM-DD")
+            i += 1
         else:
             words.append(arg)
+        i += 1
     title = " ".join(words).strip()
     if not title:
         raise ValueError("Thiếu nội dung task.")
-    return title, priority
+    return title, priority, due
 
 
 def run(argv):
@@ -120,11 +146,11 @@ def run(argv):
 
     if command == "add":
         try:
-            title, priority = parse_add_args(args)
+            title, priority, due = parse_add_args(args)
         except ValueError as error:
             print(error)
             return 1
-        add_task(title, priority)
+        add_task(title, priority, due)
     elif command == "list":
         list_tasks()
     elif command in ("done", "delete"):
