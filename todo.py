@@ -11,6 +11,7 @@ USAGE = """Cách dùng:
   python todo.py add <nội dung> [--high | --low] [--due YYYY-MM-DD]
   python todo.py list [--todo | --done]
   python todo.py search <từ khóa>
+  python todo.py stats
   python todo.py done <id>
   python todo.py delete <id>
   python todo.py edit <id> <nội dung mới>
@@ -79,6 +80,28 @@ def search_tasks(keyword):
     key = keyword.lower()
     found = [t for t in load_tasks() if key in t["title"].lower()]
     print_tasks(found, "Không tìm thấy task nào.")
+
+
+def show_stats():
+    tasks = load_tasks()
+    total = len(tasks)
+    if total == 0:
+        print("Chưa có task nào để thống kê.")
+        return
+    done = sum(1 for t in tasks if t["done"])
+    todo_count = total - done
+    rate = (done / total) * 100
+    high = sum(1 for t in tasks if t.get("priority") == "high")
+    low = sum(1 for t in tasks if t.get("priority") == "low")
+    overdue = sum(
+        1 for t in tasks
+        if not t["done"] and t.get("due") and date.fromisoformat(t["due"]) < today()
+    )
+    print(f"Tổng số task: {total}")
+    print(f"Đã hoàn thành: {done} ({rate:.1f}%)")
+    print(f"Chưa hoàn thành: {todo_count}")
+    print(f"Ưu tiên: {high} cao, {low} thấp")
+    print(f"Quá hạn: {overdue}")
 
 
 def mark_done(task_id):
@@ -178,6 +201,8 @@ def run(argv):
             print("Cách dùng: python todo.py search <từ khóa>")
             return 1
         search_tasks(" ".join(args))
+    elif command == "stats":
+        show_stats()
     elif command in ("done", "delete"):
         if not args or not args[0].isdigit():
             print(f"Cách dùng: python todo.py {command} <id>")
