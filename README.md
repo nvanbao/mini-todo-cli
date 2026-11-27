@@ -13,6 +13,8 @@
     python todo.py list --todo                           # chỉ task chưa xong
     python todo.py list --done                           # chỉ task đã xong
     python todo.py search python                         # tìm theo từ khóa
+    python todo.py stats                                 # xem thống kê tổng quan
+    python todo.py export [file.csv]                     # xuất danh sách ra file CSV
     python todo.py done 1                                # đánh dấu hoàn thành
     python todo.py edit 1 Noi dung moi                   # sửa nội dung
     python todo.py delete 1                              # xóa task

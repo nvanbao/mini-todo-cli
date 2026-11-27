@@ -1,3 +1,4 @@
+import csv
 import json
 import sys
 from datetime import date
@@ -12,6 +13,7 @@ USAGE = """Cách dùng:
   python todo.py list [--todo | --done]
   python todo.py search <từ khóa>
   python todo.py stats
+  python todo.py export [tên_file.csv]
   python todo.py done <id>
   python todo.py delete <id>
   python todo.py edit <id> <nội dung mới>
@@ -102,6 +104,22 @@ def show_stats():
     print(f"Chưa hoàn thành: {todo_count}")
     print(f"Ưu tiên: {high} cao, {low} thấp")
     print(f"Quá hạn: {overdue}")
+
+
+def export_tasks(filename="tasks.csv"):
+    tasks = load_tasks()
+    with open(filename, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["id", "title", "done", "priority", "due"])
+        for t in tasks:
+            writer.writerow([
+                t["id"],
+                t["title"],
+                t["done"],
+                t.get("priority", "normal"),
+                t.get("due", ""),
+            ])
+    print(f"Đã xuất {len(tasks)} task ra file {filename}")
 
 
 def mark_done(task_id):
@@ -203,6 +221,9 @@ def run(argv):
         search_tasks(" ".join(args))
     elif command == "stats":
         show_stats()
+    elif command == "export":
+        filename = args[0] if args else "tasks.csv"
+        export_tasks(filename)
     elif command in ("done", "delete"):
         if not args or not args[0].isdigit():
             print(f"Cách dùng: python todo.py {command} <id>")
