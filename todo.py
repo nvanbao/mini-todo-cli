@@ -9,7 +9,8 @@ PRIORITIES = {"high": "cao", "normal": "", "low": "thấp"}
 
 USAGE = """Cách dùng:
   python todo.py add <nội dung> [--high | --low] [--due YYYY-MM-DD]
-  python todo.py list
+  python todo.py list [--todo | --done]
+  python todo.py search <từ khóa>
   python todo.py done <id>
   python todo.py delete <id>
   python todo.py edit <id> <nội dung mới>
@@ -57,13 +58,27 @@ def format_task(t):
     return line
 
 
-def list_tasks():
-    tasks = load_tasks()
+def print_tasks(tasks, empty_message):
     if not tasks:
-        print("Chưa có task nào.")
+        print(empty_message)
         return
     for t in tasks:
         print(format_task(t))
+
+
+def list_tasks(only=None):
+    tasks = load_tasks()
+    if only == "todo":
+        tasks = [t for t in tasks if not t["done"]]
+    elif only == "done":
+        tasks = [t for t in tasks if t["done"]]
+    print_tasks(tasks, "Chưa có task nào.")
+
+
+def search_tasks(keyword):
+    key = keyword.lower()
+    found = [t for t in load_tasks() if key in t["title"].lower()]
+    print_tasks(found, "Không tìm thấy task nào.")
 
 
 def mark_done(task_id):
@@ -152,7 +167,17 @@ def run(argv):
             return 1
         add_task(title, priority, due)
     elif command == "list":
-        list_tasks()
+        only = None
+        if "--todo" in args:
+            only = "todo"
+        elif "--done" in args:
+            only = "done"
+        list_tasks(only)
+    elif command == "search":
+        if not args:
+            print("Cách dùng: python todo.py search <từ khóa>")
+            return 1
+        search_tasks(" ".join(args))
     elif command in ("done", "delete"):
         if not args or not args[0].isdigit():
             print(f"Cách dùng: python todo.py {command} <id>")
