@@ -1,7 +1,10 @@
+import csv
+import tempfile
 import unittest
 from datetime import date
+from pathlib import Path
 
-from reports import compute_stats
+from reports import compute_stats, export_csv
 
 TODAY = date(2026, 12, 1)
 
@@ -50,3 +53,47 @@ class TestComputeStats(unittest.TestCase):
         stats = compute_stats(tasks, TODAY)
         self.assertEqual(stats["high_open"], 0)
         self.assertEqual(stats["overdue"], 0)
+
+
+class TestExportCsv(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.path = Path(self.tmp.name) / "out.csv"
+
+    def read_rows(self):
+        with open(self.path, encoding="utf-8-sig", newline="") as f:
+            return list(csv.DictReader(f))
+
+    def test_returns_number_of_tasks(self):
+        tasks = [{"id": 1, "title": "A", "done": False}]
+        self.assertEqual(export_csv(tasks, self.path), 1)
+
+    def test_header_and_values(self):
+        tasks = [
+            {"id": 1, "title": "Nộp bài", "done": True, "priority": "high", "due": "2026-12-20"},
+            {"id": 2, "title": "Học", "done": False},
+        ]
+        export_csv(tasks, self.path)
+        rows = self.read_rows()
+        self.assertEqual(list(rows[0].keys()), ["id", "title", "done", "priority", "due"])
+        self.assertEqual(rows[0]["title"], "Nộp bài")
+        self.assertEqual(rows[0]["done"], "yes")
+        self.assertEqual(rows[0]["priority"], "high")
+        self.assertEqual(rows[0]["due"], "2026-12-20")
+        self.assertEqual(rows[1]["done"], "no")
+        self.assertEqual(rows[1]["priority"], "normal")
+        self.assertEqual(rows[1]["due"], "")
+
+    def test_title_with_comma_and_quote(self):
+        tasks = [{"id": 1, "title": 'Mua "sách", vở', "done": False}]
+        export_csv(tasks, self.path)
+        self.assertEqual(self.read_rows()[0]["title"], 'Mua "sách", vở')
+
+    def test_empty_list_writes_header_only(self):
+        self.assertEqual(export_csv([], self.path), 0)
+        self.assertEqual(self.read_rows(), [])
+
+    def test_file_has_bom_for_excel(self):
+        export_csv([{"id": 1, "title": "A", "done": False}], self.path)
+        self.assertEqual(self.path.read_bytes()[:3], b"\xef\xbb\xbf")
