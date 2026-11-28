@@ -1,4 +1,7 @@
+import csv
 from datetime import date
+
+CSV_FIELDS = ["id", "title", "done", "priority", "due"]
 
 
 def compute_stats(tasks, today):
@@ -21,3 +24,20 @@ def compute_stats(tasks, today):
         "high_open": high_open,
         "overdue": overdue,
     }
+
+
+def export_csv(tasks, path):
+    with open(path, "w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
+        writer.writeheader()
+        for t in tasks:
+            writer.writerow(
+                {
+                    "id": t["id"],
+                    "title": t["title"],
+                    "done": "yes" if t["done"] else "no",
+                    "priority": t.get("priority", "normal"),
+                    "due": t.get("due", ""),
+                }
+            )
+    return len(tasks)
